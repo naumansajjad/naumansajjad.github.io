@@ -1,4 +1,4 @@
-import { Component } from 'react'
+import { Component } from 'react';
 
 export default class Clock extends Component {
     constructor() {
@@ -7,11 +7,14 @@ export default class Clock extends Component {
         this.day_list = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         this.state = {
             hour_12: true,
-            current_time: new Date()
+            current_time: null // Initialize to null to avoid hydration errors
         };
     }
 
     componentDidMount() {
+        // Set the initial time only after the component has mounted
+        this.setState({ current_time: new Date() });
+
         this.update_time = setInterval(() => {
             this.setState({ current_time: new Date() });
         }, 10 * 1000);
@@ -22,8 +25,12 @@ export default class Clock extends Component {
     }
 
     render() {
-        const { current_time } = this.state;
+        // Only render the clock if current_time has been set
+        if (!this.state.current_time) {
+            return null; // or a loading spinner, or some placeholder content
+        }
 
+        const { current_time } = this.state;
         let day = this.day_list[current_time.getDay()];
         let hour = current_time.getHours();
         let minute = current_time.getMinutes();
@@ -40,11 +47,12 @@ export default class Clock extends Component {
         let display_time;
         if (this.props.onlyTime) {
             display_time = hour + ":" + minute + " " + meridiem;
-        }
-        else if (this.props.onlyDay) {
+        } else if (this.props.onlyDay) {
             display_time = day + " " + month + " " + date;
+        } else {
+            display_time = day + " " + month + " " + date + " " + hour + ":" + minute + " " + meridiem;
         }
-        else display_time = day + " " + month + " " + date + " " + hour + ":" + minute + " " + meridiem;
+        
         return <span>{display_time}</span>;
     }
 }
